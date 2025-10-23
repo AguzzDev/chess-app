@@ -1,33 +1,11 @@
-import {
-  Coord,
-  CustomBoard,
-  PieceColorTypeEnum,
-  PieceTypeEnum,
-  Mock,
-  MockItem,
-  MockItemResponse,
-} from "@/interfaces";
+import { Coord, PieceColorTypeEnum, PieceTypeEnum, Mock, MockItem, MockItemResponse, BoardCustom } from "@/interfaces";
 
-const rowOfPawns = (col: number) =>
-  Array.from(
-    { length: 8 },
-    (_, i) => [[col, i], PieceTypeEnum.pawn] as [number[], PieceTypeEnum]
-  );
-const castlingBoard: CustomBoard = {
-  black: [
-    [[0, 4], PieceTypeEnum.king],
-    [[0, 0], PieceTypeEnum.rook],
-    [[0, 7], PieceTypeEnum.rook],
-    ...rowOfPawns(1),
-  ],
-  white: [
-    [[7, 4], PieceTypeEnum.king],
-    [[7, 0], PieceTypeEnum.rook],
-    [[7, 7], PieceTypeEnum.rook],
-    ...rowOfPawns(6),
-  ],
+const rowOfPawns = (col: number) => Array.from({ length: 8 }, (_, i) => [[col, i], PieceTypeEnum.pawn] as [Coord, PieceTypeEnum]);
+const castlingBoard: BoardCustom = {
+  black: [[[0, 4], PieceTypeEnum.king], [[0, 0], PieceTypeEnum.rook], [[0, 7], PieceTypeEnum.rook], ...rowOfPawns(1)],
+  white: [[[7, 4], PieceTypeEnum.king], [[7, 0], PieceTypeEnum.rook], [[7, 7], PieceTypeEnum.rook], ...rowOfPawns(6)],
 };
-const pawnBoard: CustomBoard = {
+const pawnBoard: BoardCustom = {
   black: [
     [[0, 4], PieceTypeEnum.king],
     [[1, 4], PieceTypeEnum.pawn],
@@ -37,23 +15,11 @@ const pawnBoard: CustomBoard = {
     [[6, 3], PieceTypeEnum.pawn],
   ],
 };
-const horseBoard: CustomBoard = {
-  black: [
-    [[0, 4], PieceTypeEnum.king],
-    [[2, 2], PieceTypeEnum.horse],
-    [[3, 3], PieceTypeEnum.pawn],
-    ...rowOfPawns(0),
-    ...rowOfPawns(1),
-  ],
-  white: [
-    [[7, 4], PieceTypeEnum.king],
-    [[5, 2], PieceTypeEnum.horse],
-    [[4, 3], PieceTypeEnum.pawn],
-    ...rowOfPawns(6),
-    ...rowOfPawns(7),
-  ],
+const horseBoard: BoardCustom = {
+  black: [...rowOfPawns(0), ...rowOfPawns(1), [[0, 4], PieceTypeEnum.king], [[2, 2], PieceTypeEnum.horse], [[3, 3], PieceTypeEnum.pawn]],
+  white: [...rowOfPawns(6), ...rowOfPawns(7), [[7, 4], PieceTypeEnum.king], [[5, 2], PieceTypeEnum.horse], [[4, 3], PieceTypeEnum.pawn]],
 };
-const bishopBoard: CustomBoard = {
+const bishopBoard: BoardCustom = {
   black: [
     [[0, 4], PieceTypeEnum.king],
     [[3, 3], PieceTypeEnum.bishop],
@@ -63,36 +29,36 @@ const bishopBoard: CustomBoard = {
     [[4, 3], PieceTypeEnum.bishop],
   ],
 };
-const rookBoard: CustomBoard = {
+const rookBoard: BoardCustom = {
   black: [[[0, 4], PieceTypeEnum.king]],
   white: [
     [[7, 4], PieceTypeEnum.king],
     [[4, 3], PieceTypeEnum.rook],
   ],
 };
-const queenBoard: CustomBoard = {
+const queenBoard: BoardCustom = {
   black: [[[0, 4], PieceTypeEnum.king]],
   white: [
     [[7, 4], PieceTypeEnum.king],
     [[4, 3], PieceTypeEnum.queen],
   ],
 };
-const kingBoard: CustomBoard = {
+const kingBoard: BoardCustom = {
   black: [[[1, 4], PieceTypeEnum.king]],
   white: [[[6, 4], PieceTypeEnum.king]],
 };
-const pinnedBoard: CustomBoard = {
+const pinnedBoard: BoardCustom = {
   black: [[[0, 4], PieceTypeEnum.king]],
   white: [[[7, 4], PieceTypeEnum.king]],
 };
-const checksAndMatesBoard: CustomBoard = {
+const checksAndMatesBoard: BoardCustom = {
   black: [
     [[0, 4], PieceTypeEnum.king],
     [[0, 7], PieceTypeEnum.queen],
   ],
   white: [[[7, 6], PieceTypeEnum.king]],
 };
-const crowningBoard: CustomBoard = {
+const crowningBoard: BoardCustom = {
   black: [[[0, 4], PieceTypeEnum.king]],
   white: [
     [[1, 2], PieceTypeEnum.pawn],
@@ -100,15 +66,8 @@ const crowningBoard: CustomBoard = {
   ],
 };
 //castling
-const createCastlingItem = ({
-  testType = "default",
-  name,
-  isBlack = false,
-  ...override
-}: MockItem & { isBlack?: boolean }): MockItemResponse => {
-  const initOpts = isBlack
-    ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"])
-    : undefined;
+const createCastlingItem = ({ testType = "default", name, isBlack = false, ...override }: MockItem & { isBlack?: boolean }): MockItemResponse => {
+  const initOpts = isBlack ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"]) : undefined;
 
   return {
     name,
@@ -119,15 +78,8 @@ const createCastlingItem = ({
   };
 };
 //basic
-const createBasicPawnItem = ({
-  name,
-  testType = "default",
-  isBlack = false,
-  ...override
-}: MockItem & { isBlack?: boolean }): MockItemResponse => {
-  const initOpts = isBlack
-    ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"])
-    : undefined;
+const createBasicPawnItem = ({ name, testType = "default", isBlack = false, ...override }: MockItem & { isBlack?: boolean }): MockItemResponse => {
+  const initOpts = isBlack ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"]) : undefined;
 
   return {
     name,
@@ -137,16 +89,9 @@ const createBasicPawnItem = ({
     ...override,
   };
 };
-const createBasicHorseItem = ({
-  name,
-  testType = "default",
-  isBlack = false,
-  ...override
-}: MockItem & { isBlack?: boolean }): MockItemResponse => {
+const createBasicHorseItem = ({ name, testType = "default", isBlack = false, ...override }: MockItem & { isBlack?: boolean }): MockItemResponse => {
   const pos = !isBlack ? [5, 2] : [2, 2];
-  const initOpts = isBlack
-    ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"])
-    : undefined;
+  const initOpts = isBlack ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"]) : undefined;
 
   return {
     name,
@@ -157,15 +102,8 @@ const createBasicHorseItem = ({
     ...override,
   };
 };
-const createBasicBishopItem = ({
-  name,
-  testType = "default",
-  isBlack = false,
-  ...override
-}: MockItem & { isBlack?: boolean }): MockItemResponse => {
-  const initOpts = isBlack
-    ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"])
-    : undefined;
+const createBasicBishopItem = ({ name, testType = "default", isBlack = false, ...override }: MockItem & { isBlack?: boolean }): MockItemResponse => {
+  const initOpts = isBlack ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"]) : undefined;
 
   return {
     name,
@@ -176,15 +114,8 @@ const createBasicBishopItem = ({
     ...override,
   };
 };
-const createBasicRookItem = ({
-  name,
-  testType = "default",
-  isBlack = false,
-  ...override
-}: MockItem & { isBlack?: boolean }): MockItemResponse => {
-  const initOpts = isBlack
-    ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"])
-    : undefined;
+const createBasicRookItem = ({ name, testType = "default", isBlack = false, ...override }: MockItem & { isBlack?: boolean }): MockItemResponse => {
+  const initOpts = isBlack ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"]) : undefined;
 
   return {
     name,
@@ -195,15 +126,8 @@ const createBasicRookItem = ({
     ...override,
   };
 };
-const createBasicQueenItem = ({
-  name,
-  testType = "default",
-  isBlack = false,
-  ...override
-}: MockItem & { isBlack?: boolean }): MockItemResponse => {
-  const initOpts = isBlack
-    ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"])
-    : undefined;
+const createBasicQueenItem = ({ name, testType = "default", isBlack = false, ...override }: MockItem & { isBlack?: boolean }): MockItemResponse => {
+  const initOpts = isBlack ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"]) : undefined;
 
   return {
     name,
@@ -214,16 +138,9 @@ const createBasicQueenItem = ({
     ...override,
   };
 };
-const createBasicKingItem = ({
-  testType = "default",
-  name,
-  isBlack = false,
-  ...override
-}: MockItem & { isBlack?: boolean }): MockItemResponse => {
+const createBasicKingItem = ({ testType = "default", name, isBlack = false, ...override }: MockItem & { isBlack?: boolean }): MockItemResponse => {
   const pos = !isBlack ? [6, 4] : [1, 4];
-  const initOpts = isBlack
-    ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"])
-    : undefined;
+  const initOpts = isBlack ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"]) : undefined;
 
   return {
     name,
@@ -235,15 +152,8 @@ const createBasicKingItem = ({
   };
 };
 //pinned
-const createBasicPinnedItem = ({
-  name,
-  testType = "default",
-  isBlack = false,
-  ...override
-}: MockItem & { isBlack?: boolean }): MockItemResponse => {
-  const initOpts = isBlack
-    ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"])
-    : undefined;
+const createBasicPinnedItem = ({ name, testType = "default", isBlack = false, ...override }: MockItem & { isBlack?: boolean }): MockItemResponse => {
+  const initOpts = isBlack ? ({ playerStart: PieceColorTypeEnum.black } as MockItem["initOpts"]) : undefined;
 
   return {
     name,
@@ -258,11 +168,7 @@ const createBasicPinnedItem = ({
   };
 };
 //checks
-const createBasicChecksAndMatesItem = ({
-  name,
-  testType = "default",
-  ...override
-}: MockItem & { isBlack?: boolean }): MockItemResponse => {
+const createBasicChecksAndMatesItem = ({ name, testType = "default", ...override }: MockItem & { isBlack?: boolean }): MockItemResponse => {
   return {
     name,
     testType,
@@ -381,7 +287,10 @@ export const MOCKS: Mock = {
       testType: "all",
       name: "Castling not allowed in check",
       board: {
-        black: [[[0, 5], PieceTypeEnum.rook]],
+        black: [
+          [[0, 2], PieceTypeEnum.king],
+          [[0, 5], PieceTypeEnum.rook],
+        ],
         white: [
           [[7, 4], PieceTypeEnum.king],
           [[7, 0], PieceTypeEnum.rook],
@@ -542,10 +451,10 @@ export const MOCKS: Mock = {
     }),
     createCastlingItem({
       testType: "getPossibleMoves",
-      name: "Short castling not allowed because bishop in f2 is blocking",
+      name: "Short castling not allowed because bishop in a7 is blocking",
       board: {
         black: [
-          [[6, 5], PieceTypeEnum.bishop],
+          [[1, 0], PieceTypeEnum.bishop],
           [[2, 0], PieceTypeEnum.bishop],
         ],
         white: [
@@ -559,7 +468,6 @@ export const MOCKS: Mock = {
         possibleMoves: [
           [7, 3],
           [6, 3],
-          [6, 5],
           [7, 0],
         ],
       },
@@ -638,6 +546,7 @@ export const MOCKS: Mock = {
       name: "Long castling not allowed because bishop in a2 is blocking",
       board: {
         black: [
+          [[0, 4], PieceTypeEnum.king],
           [[6, 0], PieceTypeEnum.bishop],
           [[2, 0], PieceTypeEnum.bishop],
         ],
@@ -706,7 +615,7 @@ export const MOCKS: Mock = {
       name: "Long castling not allowed because bishop in d2 is blocking",
       board: {
         black: [
-          [[6, 3], PieceTypeEnum.bishop],
+          [[0, 4], PieceTypeEnum.king],
           [[2, 0], PieceTypeEnum.bishop],
         ],
         white: [
@@ -721,6 +630,7 @@ export const MOCKS: Mock = {
           [7, 3],
           [6, 3],
           [6, 5],
+          [7, 0],
         ],
       },
     }),
@@ -748,6 +658,7 @@ export const MOCKS: Mock = {
       name: "Long castling not allowed because pawn in b2 is blocking",
       board: {
         black: [
+          [[0, 2], PieceTypeEnum.king],
           [[6, 1], PieceTypeEnum.pawn],
           [[2, 0], PieceTypeEnum.bishop],
         ],
@@ -894,7 +805,7 @@ export const MOCKS: Mock = {
       }),
       createBasicHorseItem({
         name: "White horse in c3 moves to d5 and takes piece",
-        testType: "move",
+        testType: "moveAndGetHistory",
         moves: [
           [
             [5, 2],
@@ -907,7 +818,7 @@ export const MOCKS: Mock = {
       }),
       createBasicHorseItem({
         name: "Black horse in c6 moves to d4 and takes piece",
-        testType: "move",
+        testType: "moveAndGetHistory",
         isBlack: true,
         moves: [
           [
@@ -967,11 +878,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white bishop in d4 with white pawns in c5-e5",
         board: {
           ...bishopBoard,
-          white: [
-            ...bishopBoard.white,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-          ],
+          white: [...bishopBoard.white, [[3, 2], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -988,12 +895,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white bishop in d4 with white pawns in c5-e5-c3",
         board: {
           ...bishopBoard,
-          white: [
-            ...bishopBoard.white,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-            [[5, 2], PieceTypeEnum.pawn],
-          ],
+          white: [...bishopBoard.white, [[3, 2], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn], [[5, 2], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1007,13 +909,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white bishop in d4 with white pawns in c5-e5-c3-e3",
         board: {
           ...bishopBoard,
-          white: [
-            ...bishopBoard.white,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-            [[5, 2], PieceTypeEnum.pawn],
-            [[5, 4], PieceTypeEnum.pawn],
-          ],
+          white: [...bishopBoard.white, [[3, 2], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn], [[5, 2], PieceTypeEnum.pawn], [[5, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [],
@@ -1045,11 +941,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white bishop in d4 with black pawns in c5-e5",
         board: {
           ...bishopBoard,
-          black: [
-            ...bishopBoard.black,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-          ],
+          black: [...bishopBoard.black, [[3, 2], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1068,12 +960,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white bishop in d4 with black pawns in c5-e5-c3",
         board: {
           ...bishopBoard,
-          black: [
-            ...bishopBoard.black,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-            [[5, 2], PieceTypeEnum.pawn],
-          ],
+          black: [...bishopBoard.black, [[3, 2], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn], [[5, 2], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1090,13 +977,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white bishop in d4 with black pawns in c5-e5-c3-e3",
         board: {
           ...bishopBoard,
-          black: [
-            ...bishopBoard.black,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-            [[5, 2], PieceTypeEnum.pawn],
-            [[5, 4], PieceTypeEnum.pawn],
-          ],
+          black: [...bishopBoard.black, [[3, 2], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn], [[5, 2], PieceTypeEnum.pawn], [[5, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1109,7 +990,7 @@ export const MOCKS: Mock = {
       }),
       createBasicBishopItem({
         name: "White bishop in d4 takes e5",
-        testType: "move",
+        testType: "moveAndGetHistory",
         board: {
           ...bishopBoard,
           black: [...bishopBoard.black, [[3, 4], PieceTypeEnum.pawn]],
@@ -1172,11 +1053,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white rook in d4 with white pawns in d5-e4",
         board: {
           ...rookBoard,
-          white: [
-            ...rookBoard.white,
-            [[3, 3], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-          ],
+          white: [...rookBoard.white, [[3, 3], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1193,12 +1070,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white rook in d4 with white pawns in d5-e4-d3",
         board: {
           ...rookBoard,
-          white: [
-            ...rookBoard.white,
-            [[3, 3], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-            [[5, 3], PieceTypeEnum.pawn],
-          ],
+          white: [...rookBoard.white, [[3, 3], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn], [[5, 3], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1212,13 +1084,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white rook in d4 with black pawns in d5-e4-d3-c4",
         board: {
           ...rookBoard,
-          white: [
-            ...rookBoard.white,
-            [[3, 3], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-            [[5, 3], PieceTypeEnum.pawn],
-            [[4, 2], PieceTypeEnum.pawn],
-          ],
+          white: [...rookBoard.white, [[3, 3], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn], [[5, 3], PieceTypeEnum.pawn], [[4, 2], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [],
@@ -1250,11 +1116,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white rook in d4 with black pawns in d5-e4",
         board: {
           ...rookBoard,
-          black: [
-            ...rookBoard.black,
-            [[3, 3], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-          ],
+          black: [...rookBoard.black, [[3, 3], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1273,12 +1135,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white rook in d4 with black pawns in d5-e4-d3",
         board: {
           ...rookBoard,
-          black: [
-            ...rookBoard.black,
-            [[3, 3], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-            [[5, 3], PieceTypeEnum.pawn],
-          ],
+          black: [...rookBoard.black, [[3, 3], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn], [[5, 3], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1295,13 +1152,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white rook in d4 with black pawns in d5-e4-d3-c4",
         board: {
           ...rookBoard,
-          black: [
-            ...rookBoard.black,
-            [[3, 3], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-            [[5, 3], PieceTypeEnum.pawn],
-            [[4, 2], PieceTypeEnum.pawn],
-          ],
+          black: [...rookBoard.black, [[3, 3], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn], [[5, 3], PieceTypeEnum.pawn], [[4, 2], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1314,7 +1165,7 @@ export const MOCKS: Mock = {
       }),
       createBasicRookItem({
         name: "White rook in d4 takes d5",
-        testType: "move",
+        testType: "moveAndGetHistory",
         board: {
           ...rookBoard,
           black: [...rookBoard.black, [[3, 3], PieceTypeEnum.pawn]],
@@ -1404,11 +1255,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white queen in d4 with white pawn in c5,d5",
         board: {
           ...queenBoard,
-          white: [
-            ...queenBoard.white,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-          ],
+          white: [...queenBoard.white, [[3, 2], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1439,12 +1286,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white queen in d4 with white pawn in c5,d5,e5",
         board: {
           ...queenBoard,
-          white: [
-            ...queenBoard.white,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-          ],
+          white: [...queenBoard.white, [[3, 2], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1471,13 +1313,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white queen in d4 with white pawn in c5,d5,e5,e4",
         board: {
           ...queenBoard,
-          white: [
-            ...queenBoard.white,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-          ],
+          white: [...queenBoard.white, [[3, 2], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1500,14 +1336,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white queen in d4 with white pawn in c5,d5,e5,e4,e3",
         board: {
           ...queenBoard,
-          white: [
-            ...queenBoard.white,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-            [[5, 4], PieceTypeEnum.pawn],
-          ],
+          white: [...queenBoard.white, [[3, 2], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn], [[5, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1631,11 +1460,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white queen in d4 with black pawn in c5,d5",
         board: {
           ...queenBoard,
-          black: [
-            ...queenBoard.black,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-          ],
+          black: [...queenBoard.black, [[3, 2], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1668,12 +1493,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white queen in d4 with black pawn in c5,d5,e5",
         board: {
           ...queenBoard,
-          black: [
-            ...queenBoard.black,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-          ],
+          black: [...queenBoard.black, [[3, 2], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1703,13 +1523,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white queen in d4 with black pawn in c5,d5,e5,e4",
         board: {
           ...queenBoard,
-          black: [
-            ...queenBoard.black,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-          ],
+          black: [...queenBoard.black, [[3, 2], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1736,14 +1550,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves with white queen in d4 with black pawn in c5,d5,e5,e4,e3",
         board: {
           ...queenBoard,
-          black: [
-            ...queenBoard.black,
-            [[3, 2], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-            [[3, 4], PieceTypeEnum.pawn],
-            [[4, 4], PieceTypeEnum.pawn],
-            [[5, 4], PieceTypeEnum.pawn],
-          ],
+          black: [...queenBoard.black, [[3, 2], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn], [[3, 4], PieceTypeEnum.pawn], [[4, 4], PieceTypeEnum.pawn], [[5, 4], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -1856,7 +1663,7 @@ export const MOCKS: Mock = {
       }),
       createBasicQueenItem({
         name: "White queen in d4 takes d5",
-        testType: "move",
+        testType: "moveAndGetHistory",
         board: {
           ...queenBoard,
           black: [...queenBoard.black, [[3, 3], PieceTypeEnum.pawn]],
@@ -1962,11 +1769,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the white king in e2 with white pawns on the second ring e4-d4",
         board: {
           ...kingBoard,
-          white: [
-            ...kingBoard.white,
-            [[4, 4], PieceTypeEnum.pawn],
-            [[4, 3], PieceTypeEnum.pawn],
-          ],
+          white: [...kingBoard.white, [[4, 4], PieceTypeEnum.pawn], [[4, 3], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2002,11 +1805,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the white king in e2 with black pawns on the second ring e4-d4",
         board: {
           ...kingBoard,
-          black: [
-            ...kingBoard.black,
-            [[4, 4], PieceTypeEnum.pawn],
-            [[4, 3], PieceTypeEnum.pawn],
-          ],
+          black: [...kingBoard.black, [[4, 4], PieceTypeEnum.pawn], [[4, 3], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2022,12 +1821,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the white king in e2 with black pawns on the second ring e4-d4-c3",
         board: {
           ...kingBoard,
-          black: [
-            ...kingBoard.black,
-            [[4, 4], PieceTypeEnum.pawn],
-            [[4, 3], PieceTypeEnum.pawn],
-            [[5, 2], PieceTypeEnum.pawn],
-          ],
+          black: [...kingBoard.black, [[4, 4], PieceTypeEnum.pawn], [[4, 3], PieceTypeEnum.pawn], [[5, 2], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2042,13 +1836,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the white king in e2 with black pawns on the second ring e4-d4-c3-c2",
         board: {
           ...kingBoard,
-          black: [
-            ...kingBoard.black,
-            [[4, 4], PieceTypeEnum.pawn],
-            [[4, 3], PieceTypeEnum.pawn],
-            [[5, 2], PieceTypeEnum.pawn],
-            [[6, 2], PieceTypeEnum.pawn],
-          ],
+          black: [...kingBoard.black, [[4, 4], PieceTypeEnum.pawn], [[4, 3], PieceTypeEnum.pawn], [[5, 2], PieceTypeEnum.pawn], [[6, 2], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2062,14 +1850,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the white king in e2 with black pawns on the second ring e4-d4-c3-c2-g3",
         board: {
           ...kingBoard,
-          black: [
-            ...kingBoard.black,
-            [[4, 4], PieceTypeEnum.pawn],
-            [[4, 3], PieceTypeEnum.pawn],
-            [[5, 2], PieceTypeEnum.pawn],
-            [[6, 2], PieceTypeEnum.pawn],
-            [[5, 6], PieceTypeEnum.pawn],
-          ],
+          black: [...kingBoard.black, [[4, 4], PieceTypeEnum.pawn], [[4, 3], PieceTypeEnum.pawn], [[5, 2], PieceTypeEnum.pawn], [[6, 2], PieceTypeEnum.pawn], [[5, 6], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2190,11 +1971,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the black king in e7 with black pawns on the second ring e5-d5",
         board: {
           ...kingBoard,
-          black: [
-            ...kingBoard.black,
-            [[3, 4], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-          ],
+          black: [...kingBoard.black, [[3, 4], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2232,11 +2009,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the black king in e7 with white pawn on the second ring e5-d5",
         board: {
           ...kingBoard,
-          white: [
-            ...kingBoard.white,
-            [[3, 4], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-          ],
+          white: [...kingBoard.white, [[3, 4], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2253,12 +2026,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the black king in e7 with white pawn on the second ring e5-d5-c6",
         board: {
           ...kingBoard,
-          white: [
-            ...kingBoard.white,
-            [[3, 4], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-            [[2, 2], PieceTypeEnum.pawn],
-          ],
+          white: [...kingBoard.white, [[3, 4], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn], [[2, 2], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2274,13 +2042,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the black king in e7 with white pawn on the second ring e5-d5-c6-c7",
         board: {
           ...kingBoard,
-          white: [
-            ...kingBoard.white,
-            [[3, 4], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-            [[2, 2], PieceTypeEnum.pawn],
-            [[1, 2], PieceTypeEnum.pawn],
-          ],
+          white: [...kingBoard.white, [[3, 4], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn], [[2, 2], PieceTypeEnum.pawn], [[1, 2], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2295,14 +2057,7 @@ export const MOCKS: Mock = {
         name: "Possibles moves by the black king in e7 with white pawn on the second ring e5-d5-c6-c7-g6",
         board: {
           ...kingBoard,
-          white: [
-            ...kingBoard.white,
-            [[3, 4], PieceTypeEnum.pawn],
-            [[3, 3], PieceTypeEnum.pawn],
-            [[2, 2], PieceTypeEnum.pawn],
-            [[1, 2], PieceTypeEnum.pawn],
-            [[2, 6], PieceTypeEnum.pawn],
-          ],
+          white: [...kingBoard.white, [[3, 4], PieceTypeEnum.pawn], [[3, 3], PieceTypeEnum.pawn], [[2, 2], PieceTypeEnum.pawn], [[1, 2], PieceTypeEnum.pawn], [[2, 6], PieceTypeEnum.pawn]],
         },
         response: {
           possibleMoves: [
@@ -2384,6 +2139,26 @@ export const MOCKS: Mock = {
         },
       }),
       createBasicPinnedItem({
+        name: "Pawn pinned by queen in c3",
+        board: {
+          black: [...pinnedBoard.black, [[5, 2], PieceTypeEnum.queen]],
+          white: [...pinnedBoard.white, [[6, 3], PieceTypeEnum.pawn]],
+        },
+        response: {
+          possibleMoves: [[5, 2]],
+        },
+      }),
+      createBasicPinnedItem({
+        name: "Pawn pinned by queen in b4",
+        board: {
+          black: [...pinnedBoard.black, [[4, 1], PieceTypeEnum.queen]],
+          white: [...pinnedBoard.white, [[6, 3], PieceTypeEnum.pawn]],
+        },
+        response: {
+          possibleMoves: [],
+        },
+      }),
+      createBasicPinnedItem({
         name: "Pawn not pinned by horse c4",
         board: {
           black: [...pinnedBoard.black, [[4, 2], PieceTypeEnum.horse]],
@@ -2399,11 +2174,7 @@ export const MOCKS: Mock = {
       createBasicPinnedItem({
         name: "Pawn pinned by rook cannot capture",
         board: {
-          black: [
-            ...pinnedBoard.black,
-            [[4, 4], PieceTypeEnum.rook],
-            [[5, 5], PieceTypeEnum.pawn],
-          ],
+          black: [...pinnedBoard.black, [[4, 4], PieceTypeEnum.rook], [[5, 5], PieceTypeEnum.pawn]],
           white: [...pinnedBoard.white, [[6, 4], PieceTypeEnum.pawn]],
         },
         piecePos: [6, 4],
@@ -2455,11 +2226,7 @@ export const MOCKS: Mock = {
       createBasicPinnedItem({
         name: "Bishop pinned by rook cannot capture",
         board: {
-          black: [
-            ...pinnedBoard.black,
-            [[4, 4], PieceTypeEnum.rook],
-            [[5, 5], PieceTypeEnum.pawn],
-          ],
+          black: [...pinnedBoard.black, [[4, 4], PieceTypeEnum.rook], [[5, 5], PieceTypeEnum.pawn]],
           white: [...pinnedBoard.white, [[6, 4], PieceTypeEnum.bishop]],
         },
       }),
@@ -2499,11 +2266,7 @@ export const MOCKS: Mock = {
       createBasicPinnedItem({
         name: "Horse pinned by rook cannot capture",
         board: {
-          black: [
-            ...pinnedBoard.black,
-            [[4, 4], PieceTypeEnum.rook],
-            [[4, 5], PieceTypeEnum.pawn],
-          ],
+          black: [...pinnedBoard.black, [[4, 4], PieceTypeEnum.rook], [[4, 5], PieceTypeEnum.pawn]],
           white: [...pinnedBoard.white, [[6, 4], PieceTypeEnum.horse]],
         },
         response: {
@@ -2554,11 +2317,7 @@ export const MOCKS: Mock = {
       createBasicPinnedItem({
         name: "Rook pinned by rook but I can still capture it",
         board: {
-          black: [
-            ...pinnedBoard.black,
-            [[4, 4], PieceTypeEnum.rook],
-            [[4, 5], PieceTypeEnum.pawn],
-          ],
+          black: [...pinnedBoard.black, [[4, 4], PieceTypeEnum.rook], [[4, 5], PieceTypeEnum.pawn]],
           white: [...pinnedBoard.white, [[6, 4], PieceTypeEnum.rook]],
         },
         piecePos: [6, 4],
@@ -2625,11 +2384,7 @@ export const MOCKS: Mock = {
       createBasicPinnedItem({
         name: "Queen pinned by rook cannot capture",
         board: {
-          black: [
-            ...pinnedBoard.black,
-            [[4, 4], PieceTypeEnum.rook],
-            [[5, 5], PieceTypeEnum.pawn],
-          ],
+          black: [...pinnedBoard.black, [[4, 4], PieceTypeEnum.rook], [[5, 5], PieceTypeEnum.pawn]],
           white: [...pinnedBoard.white, [[6, 4], PieceTypeEnum.queen]],
         },
         piecePos: [6, 4],
@@ -2665,11 +2420,7 @@ export const MOCKS: Mock = {
         },
         board: {
           ...checksAndMatesBoard,
-          white: [
-            ...checksAndMatesBoard.white,
-            [[7, 7], PieceTypeEnum.rook],
-            [[6, 5], PieceTypeEnum.rook],
-          ],
+          white: [...checksAndMatesBoard.white, [[7, 7], PieceTypeEnum.rook], [[6, 5], PieceTypeEnum.rook]],
         },
         response: {
           possibleMoves: [
@@ -2688,11 +2439,7 @@ export const MOCKS: Mock = {
         },
         board: {
           ...checksAndMatesBoard,
-          white: [
-            ...checksAndMatesBoard.white,
-            [[7, 7], PieceTypeEnum.rook],
-            [[6, 5], PieceTypeEnum.rook],
-          ],
+          white: [...checksAndMatesBoard.white, [[7, 7], PieceTypeEnum.rook], [[6, 5], PieceTypeEnum.rook]],
         },
         piecePos: [6, 5],
         moves: [
@@ -2714,16 +2461,8 @@ export const MOCKS: Mock = {
           move: { from: [0, 7], to: [0, 6] },
         },
         board: {
-          black: [
-            ...checksAndMatesBoard.black,
-            [[6, 6], PieceTypeEnum.queen],
-            [[1, 2], PieceTypeEnum.pawn],
-          ],
-          white: [
-            ...checksAndMatesBoard.white,
-            [[7, 7], PieceTypeEnum.rook],
-            [[6, 7], PieceTypeEnum.rook],
-          ],
+          black: [...checksAndMatesBoard.black, [[6, 6], PieceTypeEnum.queen], [[1, 2], PieceTypeEnum.pawn]],
+          white: [...checksAndMatesBoard.white, [[7, 7], PieceTypeEnum.rook], [[6, 7], PieceTypeEnum.rook]],
         },
         piecePos: [6, 7],
         moves: [
@@ -2753,11 +2492,7 @@ export const MOCKS: Mock = {
           move: { from: [0, 6], to: [6, 6] },
         },
         board: {
-          black: [
-            ...checksAndMatesBoard.black,
-            [[0, 6], PieceTypeEnum.queen],
-            [[1, 2], PieceTypeEnum.pawn],
-          ],
+          black: [...checksAndMatesBoard.black, [[0, 6], PieceTypeEnum.queen], [[1, 2], PieceTypeEnum.pawn]],
           white: checksAndMatesBoard.white,
         },
         piecePos: [7, 6],
@@ -2772,6 +2507,18 @@ export const MOCKS: Mock = {
           history: "Qg2+|Kxg2",
         },
       }),
+      createBasicChecksAndMatesItem({
+        name: "Cannot take in g2 because is piece protected",
+        board: {
+          black: [...checksAndMatesBoard.black, [[0, 6], PieceTypeEnum.queen], [[6, 6], PieceTypeEnum.queen], [[1, 2], PieceTypeEnum.pawn]],
+          white: [...checksAndMatesBoard.white, [[7, 7], PieceTypeEnum.rook], [[6, 7], PieceTypeEnum.rook]],
+        },
+        piecePos: [7, 6],
+        response: {
+          possibleMoves: [],
+          history: "",
+        },
+      }),
     ],
     mates: [
       createBasicChecksAndMatesItem({
@@ -2782,13 +2529,7 @@ export const MOCKS: Mock = {
         },
         board: {
           black: checksAndMatesBoard.black,
-          white: [
-            ...checksAndMatesBoard.white,
-            [[7, 7], PieceTypeEnum.pawn],
-            [[6, 7], PieceTypeEnum.pawn],
-            [[7, 5], PieceTypeEnum.pawn],
-            [[6, 5], PieceTypeEnum.pawn],
-          ],
+          white: [...checksAndMatesBoard.white, [[7, 7], PieceTypeEnum.pawn], [[6, 7], PieceTypeEnum.pawn], [[7, 5], PieceTypeEnum.pawn], [[6, 5], PieceTypeEnum.pawn]],
         },
         response: {
           history: "Qg8#",

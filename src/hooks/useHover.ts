@@ -1,13 +1,18 @@
-import { useState, useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 export function useHover() {
-  const [hovered, setHovered] = useState<boolean>(false);
+  const hovered = useRef(false);
 
-  const onPointerOver = useCallback(() => setHovered(true), []);
-  const onPointerOut = useCallback(() => setHovered(false), []);
+  const onPointerOver = useCallback(() => {
+    hovered.current = true;
+  }, []);
+
+  const onPointerOut = useCallback(() => {
+    hovered.current = false;
+  }, []);
 
   return {
-    hovered,
+    hovered: hovered.current,
     eventHandlers: {
       onPointerOver,
       onPointerOut,

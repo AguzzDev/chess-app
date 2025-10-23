@@ -1,3 +1,5 @@
+import { BoardRepository } from "@/services/game/BoardRepository";
+import { PieceBase } from "@/services/game/PiecesRepository";
 import { Group, Object3D } from "three";
 
 //client
@@ -13,15 +15,9 @@ export interface Mock {
 }
 export interface MockItem {
   name: string;
-  testType?:
-    | "default"
-    | "getPossibleMoves"
-    | "getAllPossibleMoves"
-    | "move"
-    | "all"
-    | "possibleMovesAndHistory";
+  testType?: "default" | "getPossibleMoves" | "getAllPossibleMoves" | "move" | "moveAndGetHistory" | "all" | "possibleMovesAndHistory";
   piecePos?: Coord;
-  board?: CustomBoard;
+  board?: BoardCustom;
   moves?: CoordGroupArray;
   initOpts?: {
     playerStart?: PieceColorTypeEnum;
@@ -34,15 +30,12 @@ export interface MockItem {
   };
 }
 export interface MockItemResponse extends Omit<MockItem, "board"> {
-  board: CustomBoard;
+  board: BoardCustom;
 }
-export type Cache = Record<
-  "/models/board.glb" | "/models/pieces2.glb",
-  Group | undefined
->;
+export type Cache = Record<"/models/board.glb" | "/models/pieces2.glb", Group | undefined>;
 export interface PieceProps {
   object: Object3D;
-  opts: Omit<PieceOpts, "pinned">;
+  opts: Omit<PieceObj, "pinned">;
 }
 export type Children = React.ReactNode;
 export type GetPossibleMovesClientArgs = PieceProps["opts"];
@@ -56,86 +49,26 @@ export interface MoveToClientArgs {
 }
 
 //service
-export type CustomBoardValues = [number[], PieceTypeEnum][];
-
+export interface GameRepositoryInterface extends BoardRepository {
+  getCoord?: (type: GameMoveType) => CoordGroup;
+}
+export interface ReviewBoardRepositoryInterface extends BoardRepository {
+  getCoord: (type: GameMoveType) => CoordGroup;
+}
+export type Board = (Piece | { piece: PieceObj })[][];
+export type BoardPiece = PieceObj[][];
+export interface BoardCustom {
+  black: BoardCustomValues;
+  white: BoardCustomValues;
+}
+export type BoardCustomValues = [Coord, PieceTypeEnum][];
 export type Coord = [number, number];
 export type CoordGroup = Coord[];
 export type CoordGroupArray = Coord[][];
 export type CoordWithGroup = [Coord, CoordGroup];
 export type CoordWithGroupArray = [Coord, CoordGroup][];
-
-export type Board = number[][];
-export interface Boards {
-  normal: Board;
-  white: Board;
-  black: Board;
-}
-export type BoardMappingArgs =
-  | {
-      type: BoardMappingTypeEnum.findKing;
-      arr: Board;
-      opts?: null;
-    }
-  | {
-      type: BoardMappingTypeEnum.findMovesPointingToKing;
-      arr: Board;
-      opts: {
-        arr: Coord;
-      };
-    }
-  | {
-      type: BoardMappingTypeEnum.filterPieces;
-      arr: Board;
-      opts: {
-        arr: Coord;
-      };
-    }
-  | {
-      type: BoardMappingTypeEnum.removeMoves;
-      arr: Board;
-      opts: {
-        arr: CoordGroup;
-      };
-    }
-  | {
-      type: BoardMappingTypeEnum.getPieceMoves;
-      arr: Board;
-      opts: {
-        arr: CoordGroup;
-        checkPiece: PieceOpts;
-        movesToKing: GetMovesToKingResponse;
-      };
-    }
-  | {
-      type: BoardMappingTypeEnum.checkIfPieceProtected;
-      arr: Board;
-      opts: {
-        arr: Coord;
-      };
-    }
-  | {
-      type: BoardMappingTypeEnum.all;
-      arr: Board;
-      opts?: null;
-    };
-
-export interface IsInCheckArgs {
-  isOpponent?: boolean;
-}
-export interface CustomBoard {
-  black: CustomBoardValues;
-  white: CustomBoardValues;
-}
-export interface NormalBoardInterface {
-  getBoard(): Board;
-  getPossibleMoves(args: GetPossibleMovesArgs): CoordGroupArray;
-  moveTo(args: MoveToArgs): MoveToResponse;
-}
-export interface ExerciseBoardInterface {
-  initBoard(): Board;
-}
 export interface BoardGame {
-  move: 0;
+  move: number;
   type: BoardTypeEnum;
   opening?: string;
   history: {
@@ -159,40 +92,88 @@ export interface FromTo {
   from: Coord;
   to: Coord;
 }
-export interface Piece {
-  piece: PieceArgs["opts"];
-  boards: PieceArgs["boards"];
-  checkPossibleMoves: () => CoordGroupArray;
-}
-export interface PieceOpts {
+export type Piece = PieceBase;
+export interface PieceObj {
   pos: Coord;
   type: PieceTypeEnum;
   color?: PieceColorTypeEnum;
   pinned?: boolean;
-  castledAllowed?: boolean;
+  castledAllowed?: {
+    [CastlingTypeEnum.large]: boolean;
+    [CastlingTypeEnum.short]: boolean;
+  };
 }
-export interface PieceStatus {
+export interface PieceFlags {
   includeKing?: boolean;
   simulateMode?: boolean;
   isServer?: boolean;
   skipPinned?: boolean;
   inCheck?: BoardEachStatus;
+  skipExtraPawnMove?: boolean;
 }
 //args
-export interface GetMovesToKingResponse {
-  direct: CoordGroup;
-  secondary: CoordGroup;
+export type StartGameArgs = { playerStart?: PieceColorTypeEnum; move?: FromTo } | void;
+export type GetBoardArgs = "all" | "obj" | void;
+export interface GetPieceArgs {
+  pos: Coord;
+  type?: "all" | "obj";
 }
-export interface GetBoardResponse {
-  board: Board;
-  boardColor: (-1 | PieceColorTypeEnum | undefined)[][];
+export interface BoardFactoryArgs {
+  type: BoardTypeEnum;
+  customBoard?: BoardCustom;
+  historyMoves?: CoordGroupArray;
 }
-export interface SetBoardArgs {
-  board: Board;
-  values: CustomBoardValues | Board;
-}
-export interface GetOnlyMovesToKing {
-  from: Coord;
+export type BoardMappingArgs =
+  | {
+      type: BoardMappingTypeEnum.findKing;
+      arr: BoardPiece;
+      opts?: null;
+    }
+  | {
+      type: BoardMappingTypeEnum.findMovesPointingToKing;
+      arr: BoardPiece;
+      opts: {
+        arr: Coord;
+      };
+    }
+  | {
+      type: BoardMappingTypeEnum.filterPieces;
+      arr: BoardPiece;
+      opts: {
+        arr: Coord;
+      };
+    }
+  | {
+      type: BoardMappingTypeEnum.removeMoves;
+      arr: BoardPiece;
+      opts: {
+        arr: CoordGroup;
+      };
+    }
+  | {
+      type: BoardMappingTypeEnum.getPieceMoves;
+      arr: BoardPiece;
+      opts: {
+        arr: CoordGroup;
+        checkPiece: PieceObj;
+        movesToKing: GetMovesToKingResponse;
+      };
+    }
+  | {
+      type: BoardMappingTypeEnum.checkIfPieceProtected;
+      arr: BoardPiece;
+      opts: {
+        arr: Coord;
+      };
+    }
+  | {
+      type: BoardMappingTypeEnum.all;
+      arr: BoardPiece;
+      opts?: null;
+    };
+export interface CheckPossibleMovesPieceArgs {
+  board: BoardPiece;
+  flags: PieceFlags;
 }
 export interface UpdateHistoryArgs {
   piece?: PieceTypeEnum;
@@ -200,15 +181,10 @@ export interface UpdateHistoryArgs {
   move?: string;
   type: GameStatusTypeEnum;
 }
-export type CreatePieceArgs = Omit<PieceArgs, "boards">;
-export interface GetPossibleMovesArgs extends PieceStatus {
+export interface GetPossibleMovesArgs extends PieceFlags {
   pos: Coord;
 }
-export type CheckPositionArgs = Omit<PieceOpts, "type">;
-export interface PieceArgs extends PieceStatus {
-  opts: PieceOpts;
-  boards: Boards;
-}
+export type PieceArgs = PieceObj;
 export interface GetMovesArgs {
   directions: number[][];
   pos: Coord;
@@ -217,19 +193,20 @@ export interface GetMovesArgs {
 export interface MoveToArgs extends FromTo {
   color?: PieceColorTypeEnum;
   type?: GameStatusTypeEnum;
+  skipSpecificMove?: boolean;
+}
+//responses
+export interface GetMovesToKingResponse {
+  direct: CoordGroup;
+  secondary: CoordGroup;
 }
 export interface MoveToResponse {
   from: Coord | CoordGroup;
   to: Coord | CoordGroup;
   type: GameStatusTypeEnum;
-  pieceType: PieceTypeEnum;
+  piece: PieceObj;
+  updateBoard?: (board: Board) => void;
 }
-export interface SpecificStatesInPossibleMovesArgs {
-  piece: PieceOpts;
-  moves: CoordGroupArray;
-  args?: PieceStatus;
-}
-
 //enums
 export enum GameMoveType {
   "prev" = "prev",
@@ -247,6 +224,7 @@ export enum BoardColumnTypeEnum {
   "h",
 }
 export enum PieceTypeEnum {
+  "empty" = -1,
   "pawn",
   "horse",
   "bishop",

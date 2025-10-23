@@ -21,10 +21,7 @@ export const loadModels = async () => {
       );
     });
 
-  const modelsToLoad: (keyof Cache)[] = [
-    "/models/board.glb",
-    "/models/pieces2.glb",
-  ];
+  const modelsToLoad: (keyof Cache)[] = ["/models/board.glb", "/models/pieces2.glb"];
 
   try {
     await Promise.all(

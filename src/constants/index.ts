@@ -3,9 +3,11 @@ import { PieceTypeEnum } from "@/interfaces";
 export const CONSTANTS = {
   BOX_SIZE: 0.0657,
   BOX_SPACE: 0.0657,
+  BOX_MOVE: 0.657,
   CAMERA_POSITION: [0.01, 14, 8] as [x: number, z: number, y: number],
   PIECES: {
     DIRECTIONS: {
+      [PieceTypeEnum.empty]: [],
       [PieceTypeEnum.pawn]: [
         [0, 1],
         [1, 1],
@@ -120,32 +122,13 @@ export const CONSTANTS = {
     "e4|c5|Nf3|Nc6|d4": "Sicilian Defense: Classical",
     "e4|c5|Nf3|Nc6|Bb5": "Sicilian Defense: Moscow Variation",
     "e4|c5|Nf3|d6|d4|cxd4|Nxd4|Nf6|Nc3|e6": "Sicilian Defense: Scheveningen",
-    "e4|c5|Nf3|d6|d4|cxd4|Nxd4|Nf6|Nc3|a6|Be3|e5":
-      "Sicilian Defense: Najdorf English Attack",
+    "e4|c5|Nf3|d6|d4|cxd4|Nxd4|Nf6|Nc3|a6|Be3|e5": "Sicilian Defense: Najdorf English Attack",
     "d4|Nf6|c4|e6|Nf3|d5|Nc3|Be7": "Queen's Gambit Declined: Orthodox",
     "d4|Nf6|c4|e6|Nf3|d5|cd5|ed5|Bg5": "QGD: Lasker Defense",
     "d4|Nf6|c4|e6|Nf3|d5|cd5|ed5|Bg5|h6|Bh4|c6": "QGD: Tartakower Defense",
   },
   BOARD: {
-    INIT: [
-      PieceTypeEnum.rook,
-      PieceTypeEnum.horse,
-      PieceTypeEnum.bishop,
-      PieceTypeEnum.queen,
-      PieceTypeEnum.king,
-      PieceTypeEnum.bishop,
-      PieceTypeEnum.horse,
-      PieceTypeEnum.rook,
-    ],
-    PAWNS: [
-      PieceTypeEnum.pawn,
-      PieceTypeEnum.pawn,
-      PieceTypeEnum.pawn,
-      PieceTypeEnum.pawn,
-      PieceTypeEnum.pawn,
-      PieceTypeEnum.pawn,
-      PieceTypeEnum.pawn,
-      PieceTypeEnum.pawn,
-    ],
+    INIT: [PieceTypeEnum.rook, PieceTypeEnum.horse, PieceTypeEnum.bishop, PieceTypeEnum.queen, PieceTypeEnum.king, PieceTypeEnum.bishop, PieceTypeEnum.horse, PieceTypeEnum.rook],
+    PAWNS: [PieceTypeEnum.pawn, PieceTypeEnum.pawn, PieceTypeEnum.pawn, PieceTypeEnum.pawn, PieceTypeEnum.pawn, PieceTypeEnum.pawn, PieceTypeEnum.pawn, PieceTypeEnum.pawn],
   },
 };

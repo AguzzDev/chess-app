@@ -11,7 +11,11 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
-
+  {
+    rules: {
+      "@typescript-eslint/naming-convention": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

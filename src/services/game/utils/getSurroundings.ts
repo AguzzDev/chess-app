@@ -1,12 +1,6 @@
 import { Coord, CoordGroupArray, CoordGroup } from "@/interfaces";
 
-export const getSurroundings = ({
-  pos: [startY, startX],
-  nRings = 2,
-}: {
-  pos: Coord;
-  nRings?: number;
-}) => {
+export const getSurroundings = ({ pos: [startY, startX], nRings = 4 }: { pos: Coord; nRings?: number }) => {
   const rings: CoordGroupArray = [];
 
   for (let r = 1; r <= nRings; r++) {
@@ -25,7 +19,5 @@ export const getSurroundings = ({
     rings.push(ring);
   }
 
-  return nRings == 1
-    ? (rings.flat() as CoordGroup)
-    : (rings as CoordGroupArray);
+  return nRings == 1 ? (rings.flat() as CoordGroup) : (rings as CoordGroupArray);
 };

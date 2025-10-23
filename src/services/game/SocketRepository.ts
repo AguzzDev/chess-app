@@ -6,9 +6,7 @@ type SubscriptionDataMap = {
   Server_Crowning: boolean;
   Client_Crowning: PieceTypeEnum;
 };
-type Callback<T extends SubscriptionType> = (
-  data: SubscriptionDataMap[T]
-) => void;
+type Callback<T extends SubscriptionType> = (data: SubscriptionDataMap[T]) => void;
 
 export class SocketRepository {
   private sockets: {

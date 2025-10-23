@@ -1,33 +1,27 @@
 import { CONSTANTS } from "@/constants";
 import {
+  BoardPiece,
   BoardTypeEnum,
   Cache,
   Children,
   Coord,
   GameMoveType,
   GameStatusTypeEnum,
-  GetBoardResponse,
   GetPossibleMovesClientArgs,
   MoveToClientArgs,
-  PieceOpts,
+  PieceObj,
   PieceTypeEnum,
   UpdatePiecePosition,
 } from "@/interfaces";
+import { MOCKS } from "@/mocks";
 import { BoardRepository, BoardFactory } from "@/services/game/BoardRepository";
 import { loadModels } from "@/utils/loadModels";
 import { sleep } from "@/utils/sleep";
-import {
-  createContext,
-  RefObject,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, RefObject, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 interface Context {
   game: BoardRepository["game"];
-  restart: boolean;
+  board: BoardPiece | null;
   loading: boolean;
   cache: Cache;
   camera: {
@@ -38,8 +32,7 @@ interface Context {
   modal: boolean;
   previewMoves: number[][];
   updatePiecePosition: UpdatePiecePosition | null;
-  deletePiecePosition: number[] | null;
-  getBoard: () => GetBoardResponse;
+  deletePiecePosition: { item: Coord; skip: boolean } | undefined;
   getPossibleMoves: (args: GetPossibleMovesClientArgs) => void;
   moveTo: (args: MoveToClientArgs) => void;
   clearAll: () => void;
@@ -49,6 +42,7 @@ interface Context {
   restartGame: () => void;
   reviewGame: () => void;
   reviewMove: (type: GameMoveType) => void;
+  clearDeletePosition: () => void;
 }
 
 const GameContext = createContext<Context>({} as Context);
@@ -60,25 +54,19 @@ const GameProvider = ({ children }: { children: Children }) => {
       type: BoardTypeEnum.classic,
     })
   );
+  const [board, setBoard] = useState<Context["board"]>(null);
   const [previewMoves, setPreviewMoves] = useState<Context["previewMoves"]>([]);
-  const [updatePiecePosition, setUpdatePiecePosition] =
-    useState<Context["updatePiecePosition"]>(null);
-  const [deletePiecePosition, setDeletePiecePosition] =
-    useState<Context["deletePiecePosition"]>(null);
+  const [updatePiecePosition, setUpdatePiecePosition] = useState<Context["updatePiecePosition"]>(null);
+  const [deletePiecePosition, setDeletePiecePosition] = useState<Context["deletePiecePosition"]>();
   const [camera, setCamera] = useState<Context["camera"]>({
     position: CONSTANTS.CAMERA_POSITION,
     freeCam: false,
     resetCam: false,
   });
   const [modal, setModal] = useState<boolean>(false);
-  const [restart, setRestart] = useState<boolean>(false);
 
   const cache: RefObject<Context["cache"] | null> = useRef(null);
-  const pieceActiveRef = useRef<PieceOpts | null>(null);
-
-  const getBoard = () => {
-    return game.getBoard();
-  };
+  const pieceActiveRef = useRef<PieceObj | null>(null);
 
   const toogleFreeCamera = () => {
     setCamera((prev) => ({ ...prev, freeCam: !prev.freeCam }));
@@ -93,53 +81,41 @@ const GameProvider = ({ children }: { children: Children }) => {
   };
 
   const getPossibleMoves = (args: GetPossibleMovesClientArgs) => {
-    if (game.game.turn != args.color) return;
+    if (game!.game!.turn != args.color) return;
 
-    const moves = game.getPossibleMoves({ pos: args.pos }).flat();
+    const moves = game!.getPossibleMoves({ pos: args.pos }).flat();
     pieceActiveRef.current = args;
     setPreviewMoves(moves);
   };
 
-  const moveTo = async ({
-    from: fromArg,
-    to: toArg,
-    type: typeArg,
-  }: MoveToClientArgs) => {
-    const res = {} as { y?: number; x?: number };
-    const resReversed = {} as { y?: number; x?: number };
+  const moveTo = async ({ from: fromArg, to: toArg, type: typeArg }: MoveToClientArgs) => {
+    const res = {} as { z?: number; x?: number };
+    const resReversed = {} as { z?: number; x?: number };
 
-    const piece = pieceActiveRef.current! || fromArg;
+    const piece = pieceActiveRef.current!;
     if (!piece) return;
 
-    const [fromY, fromX] = piece.pos || fromArg;
+    const [fromY, fromX] = piece.pos;
     const [toY, toX] = toArg;
     const moveY = toY - fromY;
     const moveX = toX - fromX;
-
-    const { from, to, type, pieceType } = await game.moveTo({
+    const {
+      from,
+      to,
+      type,
+      piece: pieceType,
+    } = await game!.moveTo({
       from: fromArg || piece.pos,
       to: toArg,
       type: typeArg,
     });
-    switch (pieceType) {
-      case PieceTypeEnum.pawn:
-        res.y = moveY * CONSTANTS.BOX_SPACE;
 
-      case PieceTypeEnum.bishop:
-      case PieceTypeEnum.horse:
-      case PieceTypeEnum.rook:
-      case PieceTypeEnum.queen:
-      case PieceTypeEnum.king:
-        res.y = moveY * CONSTANTS.BOX_SPACE;
-        res.x = moveX * CONSTANTS.BOX_SPACE;
-        resReversed.y = -res.y;
-        resReversed.x = -res.x;
-    }
+    res.z = moveY * CONSTANTS.BOX_MOVE;
+    res.x = moveX * CONSTANTS.BOX_MOVE;
+    resReversed.z = -res.z;
+    resReversed.x = -res.x;
 
-    if (
-      type == GameStatusTypeEnum.castlingLarge ||
-      type === GameStatusTypeEnum.castlingShort
-    ) {
+    if (type == GameStatusTypeEnum.castlingLarge || type === GameStatusTypeEnum.castlingShort) {
       setUpdatePiecePosition({
         from: from[0] as Coord,
         to: from[1] as Coord,
@@ -152,7 +128,12 @@ const GameProvider = ({ children }: { children: Children }) => {
         move: resReversed,
       });
     } else {
-      setDeletePiecePosition(to as Coord);
+      if (type === GameStatusTypeEnum.take) {
+        setDeletePiecePosition({ item: to as Coord, skip: true });
+        await sleep(200);
+      }
+
+      setDeletePiecePosition({ item: from as Coord, skip: false });
       await sleep(200);
       setUpdatePiecePosition({
         from: from as Coord,
@@ -166,7 +147,11 @@ const GameProvider = ({ children }: { children: Children }) => {
 
   const updatePiece = (pieceType: PieceTypeEnum) => {
     setModal(false);
-    game.socket.publish("Client_Crowning", pieceType);
+    game!.socket.publish("Client_Crowning", pieceType);
+  };
+
+  const clearDeletePosition = () => {
+    setDeletePiecePosition(undefined);
   };
 
   const clearPreviewMoves = () => {
@@ -183,7 +168,6 @@ const GameProvider = ({ children }: { children: Children }) => {
   };
 
   const restartGame = () => {
-    setRestart(true);
     setGame(BoardFactory.create({ type: BoardTypeEnum.classic }));
   };
 
@@ -191,14 +175,13 @@ const GameProvider = ({ children }: { children: Children }) => {
     setGame(
       BoardFactory.create({
         type: BoardTypeEnum.review,
-        historyMoves: game.game.history.moves,
+        historyMoves: game!.game!.history.moves,
       })
     );
-    setRestart(true);
   };
 
   const reviewMove = (type: GameMoveType) => {
-    const res = game.getCoord(type);
+    const res = game!.getCoord!(type);
     if (!res) return;
 
     moveTo({
@@ -208,21 +191,34 @@ const GameProvider = ({ children }: { children: Children }) => {
     });
   };
 
+  const memoValues = useMemo(
+    () => ({
+      board,
+      setBoard,
+    }),
+    [board]
+  );
+
   useEffect(() => {
     if (!game) return;
 
     const fn = async () => {
+      setLoading(true);
       cache.current = await loadModels();
-      game.startGame({});
+      game.startGame({
+        // playerStart: PieceColorTypeEnum.black,
+        // move: { from: [0, 6], to: [6, 6] },
+      });
+      const b = game.getBoard() as BoardPiece;
+      setBoard(b);
       setLoading(false);
-      setRestart(false);
     };
     fn();
-  }, [game, restart]);
+  }, [game]);
 
   useEffect(() => {
     if (loading) return;
-    const socket = game.socket;
+    const socket = game!.socket;
 
     socket.once("Server_Crowning", async () => {
       setModal(true);
@@ -232,8 +228,8 @@ const GameProvider = ({ children }: { children: Children }) => {
   return (
     <GameContext.Provider
       value={{
-        game: game.game,
-        restart,
+        game: game!.game,
+        board: memoValues.board,
         loading,
         modal,
         cache: cache.current!,
@@ -241,9 +237,9 @@ const GameProvider = ({ children }: { children: Children }) => {
         camera,
         updatePiecePosition,
         deletePiecePosition,
+        clearDeletePosition,
         updatePiece,
         reviewGame,
-        getBoard,
         getPossibleMoves,
         moveTo,
         clearAll,

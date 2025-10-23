@@ -3,7 +3,7 @@ import {
   Coord,
   CoordGroup,
   CoordGroupArray,
-  CustomBoard,
+  BoardCustom,
   FromTo,
   PieceColorTypeEnum,
 } from "@/interfaces";
@@ -18,7 +18,7 @@ export const utils = () => {
     playerStart,
     move,
   }: {
-    board: CustomBoard;
+    board: BoardCustom;
     playerStart?: PieceColorTypeEnum;
     move?: FromTo;
   }) => {
